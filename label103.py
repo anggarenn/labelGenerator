@@ -89,6 +89,7 @@ st.markdown(
             z-index: -1;
             font-weight: bold;
             white-space: nowrap;
+            pointer-events: none;
         }
     </style>
     <div class="watermark">
