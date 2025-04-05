@@ -86,15 +86,20 @@ template_akhir = st.text_input("Template Alamat (misalnya: 'Di Tempat.')", "Di T
 if input_option == "Input Manual":
     # Input manual daftar nama
     daftar_nama_input = st.text_area("Masukkan daftar nama (pisahkan setiap nama dengan baris baru)")
-    if st.button("Generate Label") and daftar_nama_input:
-        daftar_nama = daftar_nama_input.splitlines()
-        output_file = "label_undangan.docx"
-        result = create_label_docx(daftar_nama, template_awal, template_akhir, output_file)
-        st.success(f"✅ Label berhasil dibuat! File disimpan di: {output_file}")
+    
+    # Validasi input
+    if st.button("Generate Label"):
+        if not daftar_nama_input.strip():  # Jika input kosong
+            st.error("❌ Data daftar nama tamu tidak boleh kosong.")
+        else:
+            daftar_nama = daftar_nama_input.splitlines()
+            output_file = "label_undangan.docx"
+            result = create_label_docx(daftar_nama, template_awal, template_akhir, output_file)
+            st.success(f"✅ Label berhasil dibuat! File disimpan di: {output_file}")
 
-        # Offer untuk download file
-        with open(output_file, "rb") as f:
-            st.download_button("Download Label", f, file_name=output_file, mime="application/vnd.openxmlformats-officedocument.wordprocessingml.document")
+            # Offer untuk download file
+            with open(output_file, "rb") as f:
+                st.download_button("Download Label", f, file_name=output_file, mime="application/vnd.openxmlformats-officedocument.wordprocessingml.document")
 
 elif input_option == "Upload File .txt":
     # Upload file .txt
@@ -112,13 +117,18 @@ elif input_option == "Upload File .txt":
         if st.button("Generate Label"):
             with open(temp_filename, encoding='utf-8') as f:
                 daftar_nama = [line.strip() for line in f if line.strip()]
-            output_file = "label_undangan.docx"
-            result = create_label_docx(daftar_nama, template_awal, template_akhir, output_file)
-            st.success(f"✅ Label berhasil dibuat! File disimpan di: {output_file}")
 
-            # Offer untuk download file
-            with open(output_file, "rb") as f:
-                st.download_button("Download Label", f, file_name=output_file, mime="application/vnd.openxmlformats-officedocument.wordprocessingml.document")
+            # Validasi input
+            if not daftar_nama:
+                st.error("❌ Data daftar nama tamu tidak boleh kosong.")
+            else:
+                output_file = "label_undangan.docx"
+                result = create_label_docx(daftar_nama, template_awal, template_akhir, output_file)
+                st.success(f"✅ Label berhasil dibuat! File disimpan di: {output_file}")
+
+                # Offer untuk download file
+                with open(output_file, "rb") as f:
+                    st.download_button("Download Label", f, file_name=output_file, mime="application/vnd.openxmlformats-officedocument.wordprocessingml.document")
         
         # Delete temporary file
         os.remove(temp_filename)
