@@ -79,8 +79,9 @@ st.write("Pilih opsi di bawah untuk membuat label undangan:")
 input_option = st.radio("Pilih cara input daftar nama", ("Input Manual", "Upload File .txt"))
 
 # Input template yang bisa diedit
-template_awal = st.text_input("Template Awal (misalnya: 'Kepada Yth,')", "Kepada Yth,")
-template_akhir = st.text_input("Template Akhir (misalnya: 'Di Tempat.')", "Di Tempat.")
+st.write("Anda dapat mengubah template untuk bagian salam dan alamat:")
+template_awal = st.text_input("Template Salam (misalnya: 'Kepada Yth,')", "Kepada Yth,")
+template_akhir = st.text_input("Template Alamat (misalnya: 'Di Tempat.')", "Di Tempat.")
 
 if input_option == "Input Manual":
     # Input manual daftar nama
