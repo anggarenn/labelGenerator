@@ -75,6 +75,28 @@ def create_label_docx(daftar_nama, template_awal, template_akhir, nama_output="l
 st.title("Generator Label Undangan")
 st.write("Pilih opsi di bawah untuk membuat label undangan:")
 
+# Menambahkan watermark di halaman Streamlit
+st.markdown(
+    """
+    <style>
+        .watermark {
+            position: absolute;
+            top: 50%;
+            left: 50%;
+            transform: translate(-50%, -50%);
+            font-size: 70px;
+            color: rgba(0, 0, 0, 0.1);
+            z-index: -1;
+            font-weight: bold;
+            pointer-events: none;
+            white-space: nowrap;
+        }
+    </style>
+    <div class="watermark">
+        WATERMARK
+    </div>
+    """, unsafe_allow_html=True)
+
 # Pilih opsi input manual atau upload file
 input_option = st.radio("Pilih cara input daftar nama", ("Input Manual", "Upload File .txt"))
 
