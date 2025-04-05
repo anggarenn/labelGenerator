@@ -3,12 +3,10 @@ from docx import Document
 from docx.shared import Cm, Pt
 from docx.enum.text import WD_ALIGN_PARAGRAPH
 from docx.enum.table import WD_TABLE_ALIGNMENT, WD_ALIGN_VERTICAL
+import os
 
-# Fungsi untuk membuat file label undangan
-def create_label_docx(nama_file_txt, template_salam, template_akhir, nama_output="label_undangan.docx"):
-    with open(nama_file_txt, encoding='utf-8') as f:
-        daftar_nama = [line.strip() for line in f if line.strip()]
-
+def create_label_docx(daftar_nama, template_message, nama_output="label_undangan.docx"):
+    # Membuat dokumen baru
     doc = Document()
     section = doc.sections[0]
     section.top_margin = Cm(0)
@@ -16,19 +14,23 @@ def create_label_docx(nama_file_txt, template_salam, template_akhir, nama_output
     section.left_margin = Cm(0)
     section.right_margin = Cm(0)
 
+    # Mengatur jumlah label per halaman (12 label per halaman)
     label_per_halaman = 12
     jumlah_halaman = (len(daftar_nama) + label_per_halaman - 1) // label_per_halaman
 
     index = 0
     for _ in range(jumlah_halaman):
+        # Membuat tabel 4x3 untuk 12 label
         table = doc.add_table(rows=4, cols=3)
         table.alignment = WD_TABLE_ALIGNMENT.CENTER
         table.autofit = False
 
+        # Menyesuaikan tinggi setiap baris pada tabel
         for row in table.rows:
             row.height = Cm(3.2)
             row.height_rule = True
 
+        # Membuat label pada setiap cell tabel
         for r in range(4):
             for c in range(3):
                 if index >= len(daftar_nama):
@@ -43,7 +45,6 @@ def create_label_docx(nama_file_txt, template_salam, template_akhir, nama_output
                 p.paragraph_format.left_indent = Cm(1.2)
                 p.paragraph_format.line_spacing = Pt(12)
 
-                # Atur margin atas berdasarkan baris
                 if r == 0:
                     space_top = Pt(40)
                 elif r == 1:
@@ -51,38 +52,71 @@ def create_label_docx(nama_file_txt, template_salam, template_akhir, nama_output
                 elif r == 2:
                     space_top = Pt(70)
                 elif r == 3:
-                    space_top = Pt(60)  # Naikkan dari sebelumnya
+                    space_top = Pt(60)
 
                 p.paragraph_format.space_before = space_top
 
-                # Gunakan template yang dimasukkan pengguna
-                run = p.add_run(f"{template_salam}\n{daftar_nama[index]}\n{template_akhir}")
+                # Menambahkan nama dengan template pesan
+                run = p.add_run(f"{template_message.replace('[Nama]', daftar_nama[index])}")
                 run.font.name = "Calibri"
                 run.font.size = Pt(11)
 
                 index += 1
 
+        # Jika masih ada nama, tambahkan halaman baru
         if index < len(daftar_nama):
             doc.add_page_break()
 
+    # Simpan hasil file
     doc.save(nama_output)
-    print(f"✅ File '{nama_output}' berhasil dibuat!")
+    return nama_output
 
-# Streamlit interface
+# Streamlit Web App
 st.title("Generator Label Undangan")
+st.write("Pilih opsi di bawah untuk membuat label undangan:")
 
-# Input template untuk salam dan bagian akhir
-template_salam = st.text_input("Masukkan template salam (contoh: 'Kepada Yth,')", "Kepada Yth,")
-template_akhir = st.text_input("Masukkan template bagian akhir (contoh: 'Di Tempat.')", "Di Tempat.")
+# Pilih opsi input manual atau upload file
+input_option = st.radio("Pilih cara input daftar nama", ("Input Manual", "Upload File .txt"))
 
-# Input file daftar nama
-uploaded_file = st.file_uploader("Upload file daftar nama (.txt)", type="txt")
+# Input template kata-kata
+template_message = st.text_area("Masukkan template pesan (gunakan '[Nama]' untuk menggantikan nama)", value="Kepada Yth,\n[Nama]\nDi Tempat.")
 
-# Menangani tombol generate
-if uploaded_file is not None:
-    with open("daftar_nama.txt", "wb") as f:
-        f.write(uploaded_file.getbuffer())
-    
-    if st.button("Generate Label"):
-        create_label_docx("daftar_nama.txt", template_salam, template_akhir)
-        st.success("✅ Label berhasil dibuat!")
+if input_option == "Input Manual":
+    # Input manual daftar nama
+    daftar_nama_input = st.text_area("Masukkan daftar nama (pisahkan setiap nama dengan baris baru)")
+    if st.button("Generate Label") and daftar_nama_input:
+        daftar_nama = daftar_nama_input.splitlines()
+        output_file = "label_undangan.docx"
+        result = create_label_docx(daftar_nama, template_message, output_file)
+        st.success(f"✅ Label berhasil dibuat! File disimpan di: {output_file}")
+
+        # Offer untuk download file
+        with open(output_file, "rb") as f:
+            st.download_button("Download Label", f, file_name=output_file, mime="application/vnd.openxmlformats-officedocument.wordprocessingml.document")
+
+elif input_option == "Upload File .txt":
+    # Upload file .txt
+    uploaded_file = st.file_uploader("Pilih file daftar nama", type="txt")
+
+    if uploaded_file is not None:
+        # Simpan file sementara
+        temp_filename = "uploaded_daftar_nama.txt"
+        with open(temp_filename, "wb") as f:
+            f.write(uploaded_file.getbuffer())
+
+        st.write(f"File {uploaded_file.name} berhasil diupload!")
+
+        # Button untuk generate label
+        if st.button("Generate Label"):
+            with open(temp_filename, encoding='utf-8') as f:
+                daftar_nama = [line.strip() for line in f if line.strip()]
+            output_file = "label_undangan.docx"
+            result = create_label_docx(daftar_nama, template_message, output_file)
+            st.success(f"✅ Label berhasil dibuat! File disimpan di: {output_file}")
+
+            # Offer untuk download file
+            with open(output_file, "rb") as f:
+                st.download_button("Download Label", f, file_name=output_file, mime="application/vnd.openxmlformats-officedocument.wordprocessingml.document")
+
+        # Hapus file sementara setelah proses selesai
+        os.remove(temp_filename)
