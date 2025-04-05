@@ -99,7 +99,7 @@ if input_option == "Input Manual":
 
             # Offer untuk download file
             with open(output_file, "rb") as f:
-                st.download_button("Download Label", f, file_name=output_file, mime="application/vnd.openxmlformats-officedocument.wordprocessingml.document")
+                st.download_button("Download Template Label", f, file_name=output_file, mime="application/vnd.openxmlformats-officedocument.wordprocessingml.document")
 
 elif input_option == "Upload File .txt":
     # Upload file .txt
