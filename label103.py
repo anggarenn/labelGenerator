@@ -5,7 +5,7 @@ from docx.enum.text import WD_ALIGN_PARAGRAPH
 from docx.enum.table import WD_TABLE_ALIGNMENT, WD_ALIGN_VERTICAL
 
 # Fungsi untuk membuat file label undangan
-def create_label_docx(nama_file_txt, template, nama_output="label_undangan.docx"):
+def create_label_docx(nama_file_txt, template_salam, template_akhir, nama_output="label_undangan.docx"):
     with open(nama_file_txt, encoding='utf-8') as f:
         daftar_nama = [line.strip() for line in f if line.strip()]
 
@@ -56,7 +56,7 @@ def create_label_docx(nama_file_txt, template, nama_output="label_undangan.docx"
                 p.paragraph_format.space_before = space_top
 
                 # Gunakan template yang dimasukkan pengguna
-                run = p.add_run(template.format(nama=daftar_nama[index]))
+                run = p.add_run(f"{template_salam}\n{daftar_nama[index]}\n{template_akhir}")
                 run.font.name = "Calibri"
                 run.font.size = Pt(11)
 
@@ -71,11 +71,9 @@ def create_label_docx(nama_file_txt, template, nama_output="label_undangan.docx"
 # Streamlit interface
 st.title("Generator Label Undangan")
 
-# Input template kata-kata
-template = st.text_input(
-    "Masukkan template kata-kata (gunakan {nama} untuk nama):",
-    "Kepada Yth,\n{nama}\nDi Tempat."
-)
+# Input template untuk salam dan bagian akhir
+template_salam = st.text_input("Masukkan template salam (contoh: 'Kepada Yth,')", "Kepada Yth,")
+template_akhir = st.text_input("Masukkan template bagian akhir (contoh: 'Di Tempat.')", "Di Tempat.")
 
 # Input file daftar nama
 uploaded_file = st.file_uploader("Upload file daftar nama (.txt)", type="txt")
@@ -86,5 +84,5 @@ if uploaded_file is not None:
         f.write(uploaded_file.getbuffer())
     
     if st.button("Generate Label"):
-        create_label_docx("daftar_nama.txt", template)
+        create_label_docx("daftar_nama.txt", template_salam, template_akhir)
         st.success("✅ Label berhasil dibuat!")
