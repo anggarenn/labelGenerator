@@ -5,7 +5,7 @@ from docx.enum.text import WD_ALIGN_PARAGRAPH
 from docx.enum.table import WD_TABLE_ALIGNMENT, WD_ALIGN_VERTICAL
 import os
 
-def create_label_docx(daftar_nama, template_message, nama_output="label_undangan.docx"):
+def create_label_docx(daftar_nama, nama_output="label_undangan.docx"):
     # Membuat dokumen baru
     doc = Document()
     section = doc.sections[0]
@@ -56,8 +56,8 @@ def create_label_docx(daftar_nama, template_message, nama_output="label_undangan
 
                 p.paragraph_format.space_before = space_top
 
-                # Menambahkan nama dengan template pesan
-                run = p.add_run(f"{template_message.replace('[Nama]', daftar_nama[index])}")
+                # Menambahkan nama dengan template pesan yang sudah tetap
+                run = p.add_run(f"Kepada Yth,\n{daftar_nama[index]}\nDi Tempat.")
                 run.font.name = "Calibri"
                 run.font.size = Pt(11)
 
@@ -75,11 +75,16 @@ def create_label_docx(daftar_nama, template_message, nama_output="label_undangan
 st.title("Generator Label Undangan")
 st.write("Pilih opsi di bawah untuk membuat label undangan:")
 
+# Menambahkan informasi peringatan untuk template
+st.markdown("""
+**Catatan:**
+Template pesan yang digunakan adalah **"Kepada Yth,\n[Nama]\nDi Tempat."**
+Bagian **[Nama]** akan otomatis digantikan dengan nama dari daftar.
+**Jangan mengubah atau menghapus format template ini.**
+""")
+
 # Pilih opsi input manual atau upload file
 input_option = st.radio("Pilih cara input daftar nama", ("Input Manual", "Upload File .txt"))
-
-# Input template kata-kata
-template_message = st.text_area("Masukkan template pesan (gunakan '[Nama]' untuk menggantikan nama)", value="Kepada Yth,\n[Nama]\nDi Tempat.")
 
 if input_option == "Input Manual":
     # Input manual daftar nama
@@ -87,7 +92,7 @@ if input_option == "Input Manual":
     if st.button("Generate Label") and daftar_nama_input:
         daftar_nama = daftar_nama_input.splitlines()
         output_file = "label_undangan.docx"
-        result = create_label_docx(daftar_nama, template_message, output_file)
+        result = create_label_docx(daftar_nama, output_file)
         st.success(f"✅ Label berhasil dibuat! File disimpan di: {output_file}")
 
         # Offer untuk download file
@@ -111,7 +116,7 @@ elif input_option == "Upload File .txt":
             with open(temp_filename, encoding='utf-8') as f:
                 daftar_nama = [line.strip() for line in f if line.strip()]
             output_file = "label_undangan.docx"
-            result = create_label_docx(daftar_nama, template_message, output_file)
+            result = create_label_docx(daftar_nama, output_file)
             st.success(f"✅ Label berhasil dibuat! File disimpan di: {output_file}")
 
             # Offer untuk download file
