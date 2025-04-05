@@ -76,7 +76,7 @@ st.title("Generator Label Undangan")
 st.write("Pilih opsi di bawah untuk membuat label undangan:")
 
 # Pilih opsi input manual atau upload file
-input_option = st.radio("Pilih cara input daftar nama", ("Input Manual Daftar Tamu", "Upload File Daftar Tamu .txt"))
+input_option = st.radio("Pilih cara input daftar nama", ("Input Manual", "Upload File .txt"))
 
 # Input template yang bisa diedit
 st.write("Anda dapat mengubah template untuk bagian salam dan alamat:")
