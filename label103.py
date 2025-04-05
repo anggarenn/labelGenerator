@@ -57,14 +57,6 @@ def create_label_docx(daftar_nama, nama_output="label_undangan.docx"):
 
                 index += 1
 
-        # Watermark text at the bottom of the page
-        if index == len(daftar_nama):
-            watermark_paragraph = doc.add_paragraph()
-            watermark_paragraph.alignment = WD_ALIGN_PARAGRAPH.CENTER
-            watermark_run = watermark_paragraph.add_run("Design by Angga Reno & Nabilah")
-            watermark_run.font.size = Pt(6)
-            watermark_run.font.color.rgb = (169, 169, 169)  # Light grey
-
         if index < len(daftar_nama):
             doc.add_page_break()
 
@@ -81,24 +73,25 @@ input_option = st.radio("Pilih cara input daftar nama", ("Input Manual", "Upload
 
 if input_option == "Input Manual":
     # Input manual daftar nama
-    daftar_nama_input = st.text_area("Masukkan daftar nama (pisahkan setiap nama dengan baris baru)")
+    daftar_nama_input = st.text_area("Masukkan daftar nama (pisahkan setiap nama dengan baris baru)", key="manual_input")
     
-    # Validasi jika daftar nama kosong
-    if st.button("Generate Label") and not daftar_nama_input:
-        st.error("❗ Data daftar nama tamu tidak boleh kosong!")
-    elif st.button("Generate Label") and daftar_nama_input:
+    # Button dengan ID unik
+    if st.button("Generate Label", key="generate_label_manual") and daftar_nama_input:
         daftar_nama = daftar_nama_input.splitlines()
-        output_file = "label_undangan.docx"
-        result = create_label_docx(daftar_nama, output_file)
-        st.success(f"✅ Label berhasil dibuat! File disimpan di: {output_file}")
+        if not daftar_nama:
+            st.error("❌ Data daftar nama tamu tidak boleh kosong!")
+        else:
+            output_file = "label_undangan.docx"
+            result = create_label_docx(daftar_nama, output_file)
+            st.success(f"✅ Label berhasil dibuat! File disimpan di: {output_file}")
 
-        # Offer untuk download file
-        with open(output_file, "rb") as f:
-            st.download_button("Download Label", f, file_name=output_file, mime="application/vnd.openxmlformats-officedocument.wordprocessingml.document")
+            # Offer untuk download file
+            with open(output_file, "rb") as f:
+                st.download_button("Download Label", f, file_name=output_file, mime="application/vnd.openxmlformats-officedocument.wordprocessingml.document")
 
 elif input_option == "Upload File .txt":
     # Upload file .txt
-    uploaded_file = st.file_uploader("Pilih file daftar nama", type="txt")
+    uploaded_file = st.file_uploader("Pilih file daftar nama", type="txt", key="upload_txt")
 
     if uploaded_file is not None:
         # Simpan file sementara
@@ -108,13 +101,13 @@ elif input_option == "Upload File .txt":
         
         st.write(f"File {uploaded_file.name} berhasil diupload!")
 
-        # Button untuk generate label
-        if st.button("Generate Label"):
+        # Button untuk generate label dengan ID unik
+        if st.button("Generate Label", key="generate_label_upload"):
             with open(temp_filename, encoding='utf-8') as f:
                 daftar_nama = [line.strip() for line in f if line.strip()]
-
+            
             if not daftar_nama:
-                st.error("❗ Data daftar nama tamu tidak boleh kosong!")
+                st.error("❌ Data daftar nama tamu tidak boleh kosong!")
             else:
                 output_file = "label_undangan.docx"
                 result = create_label_docx(daftar_nama, output_file)
