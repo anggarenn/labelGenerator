@@ -124,7 +124,7 @@ elif input_option == "Upload File .txt":
             else:
                 output_file = "label_undangan.docx"
                 result = create_label_docx(daftar_nama, template_awal, template_akhir, output_file)
-                st.success(f"✅ Label berhasil dibuat! File disimpan di: {output_file}")
+                st.success(f"✅ Label berhasil dibuat! File disimpan dengan nama file: {output_file}")
 
                 # Offer untuk download file
                 with open(output_file, "rb") as f:
