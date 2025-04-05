@@ -6,6 +6,12 @@ from docx.enum.table import WD_TABLE_ALIGNMENT, WD_ALIGN_VERTICAL
 import os
 
 def create_label_docx(daftar_nama, template_awal, template_akhir, nama_output="label_undangan.docx"):
+    # Jika template kosong, gunakan default
+    if not template_awal:
+        template_awal = "Kepada Yth,"
+    if not template_akhir:
+        template_akhir = "Di Tempat."
+
     doc = Document()
     section = doc.sections[0]
     section.top_margin = Cm(0)
@@ -51,7 +57,7 @@ def create_label_docx(daftar_nama, template_awal, template_akhir, nama_output="l
 
                 p.paragraph_format.space_before = space_top
 
-                # Ganti template dengan yang diinput oleh pengguna
+                # Gunakan template yang diinput atau default
                 run = p.add_run(f"{template_awal}\n{daftar_nama[index]}\n{template_akhir}")
                 run.font.name = "Calibri"
                 run.font.size = Pt(11)
@@ -73,13 +79,13 @@ st.write("Pilih opsi di bawah untuk membuat label undangan:")
 input_option = st.radio("Pilih cara input daftar nama", ("Input Manual", "Upload File .txt"))
 
 # Input template yang bisa diedit
-template_awal = st.text_input("Template Awal (misalnya: 'Kepada Yth,')")
-template_akhir = st.text_input("Template Akhir (misalnya: 'Di Tempat.')")
+template_awal = st.text_input("Template Awal (misalnya: 'Kepada Yth,')", "Kepada Yth,")
+template_akhir = st.text_input("Template Akhir (misalnya: 'Di Tempat.')", "Di Tempat.")
 
 if input_option == "Input Manual":
     # Input manual daftar nama
     daftar_nama_input = st.text_area("Masukkan daftar nama (pisahkan setiap nama dengan baris baru)")
-    if st.button("Generate Label") and daftar_nama_input and template_awal and template_akhir:
+    if st.button("Generate Label") and daftar_nama_input:
         daftar_nama = daftar_nama_input.splitlines()
         output_file = "label_undangan.docx"
         result = create_label_docx(daftar_nama, template_awal, template_akhir, output_file)
@@ -102,7 +108,7 @@ elif input_option == "Upload File .txt":
         st.write(f"File {uploaded_file.name} berhasil diupload!")
 
         # Button untuk generate label
-        if st.button("Generate Label") and template_awal and template_akhir:
+        if st.button("Generate Label"):
             with open(temp_filename, encoding='utf-8') as f:
                 daftar_nama = [line.strip() for line in f if line.strip()]
             output_file = "label_undangan.docx"
